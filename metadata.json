@@ -1,0 +1,7 @@
+{
+  "name": "Hanzi Flow - 汉字笔顺",
+  "description": "A refined application for visualizing Chinese character stroke order. Supports input via typing or camera OCR using Gemini AI.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
