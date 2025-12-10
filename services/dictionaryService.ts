@@ -3,69 +3,100 @@ import 'cnchar-poly';
 import 'cnchar-radical';
 import 'cnchar-explain';
 import 'cnchar-words';
+import 'cnchar-order';
 
-// Initialize cnchar (optional config)
+// Initialize cnchar
 cnchar.use();
+
+export interface WordItem {
+  text: string;
+  pinyin: string;
+}
 
 export interface CharacterMetadata {
   radical: string;
-  strokes: number;
+  radicalStrokes: number;
+  totalStrokes: number;
+  remainingStrokes: number;
   pinyin: string[];
-  words: string[];
+  words: WordItem[];
   definition: string;
 }
 
-/**
- * Clean input string to keep only Chinese characters
- */
 export const cleanHanziString = (input: string): string => {
   const hanziRegex = /[\u4E00-\u9FFF\u3400-\u4DBF\u20000-\u2A6DF\u2A700-\u2B73F\u2B740-\u2B81F\u2B820-\u2CEAF\uF900-\uFAFF\u2F800-\u2FA1F]/g;
   const matches = input.match(hanziRegex);
   return matches ? matches.join('') : '';
 };
 
-/**
- * Fetches metadata using cnchar library (Offline/Local)
- */
+export const getStrokeNames = (char: string): string[] => {
+    try {
+        // @ts-ignore
+        const strokes = cnchar.stroke(char, 'order', 'name');
+        if(Array.isArray(strokes)) return strokes;
+        return [];
+    } catch (e) {
+        return [];
+    }
+}
+
 export const getCharacterInfo = async (char: string): Promise<CharacterMetadata> => {
-  if (!char) return { radical: '', strokes: 0, pinyin: [], words: [], definition: '' };
+  if (!char) return { 
+    radical: '', 
+    radicalStrokes: 0,
+    totalStrokes: 0,
+    remainingStrokes: 0,
+    pinyin: [], 
+    words: [], 
+    definition: '' 
+  };
 
   try {
-    // 1. Get basic info (spell = pinyin, stroke = strokes)
-    // args: 'spell', 'stroke', 'up' (uppercase tone)
-    const spellInfo = (cnchar as any).spell(char, 'array', 'tone');
-    const strokeCount = (cnchar as any).stroke(char);
-    
-    // 2. Get Radical
     // @ts-ignore
-    const radical = cnchar.radical(char) || '';
+    const spellInfo = cnchar.spell(char, 'array', 'tone', 'low');
+    
+    // @ts-ignore
+    const radicalData = cnchar.radical(char);
+    const info = Array.isArray(radicalData) ? radicalData[0] : radicalData;
+    
+    const radical = info?.radical || '';
+    const totalStrokes = (info as any)?.stroke || (cnchar as any).stroke(char);
+    const radicalStrokes = info?.radicalCount || (radical ? (cnchar as any).stroke(radical) : 0);
+    const remainingStrokes = Math.max(0, totalStrokes - radicalStrokes);
 
-    // 3. Get Explanation (Definition)
     // @ts-ignore
     const explainData = cnchar.explain(char);
     let definition = '';
     if (explainData && Array.isArray(explainData)) {
-        // Extract the first meaning, cleanup format
         definition = explainData[0]?.replace(/.*\s：/, '') || '';
     }
 
-    // 4. Get Words (组词)
     // @ts-ignore
     const wordsData = cnchar.words(char);
-    const words = Array.isArray(wordsData) ? wordsData.slice(0, 3) : [];
+    const rawWords: string[] = Array.isArray(wordsData) ? wordsData.slice(0, 3) : [];
+    
+    const words: WordItem[] = rawWords.map(w => {
+        // @ts-ignore
+        const wp = cnchar.spell(w, 'tone', 'low');
+        return { text: w, pinyin: wp as string };
+    });
 
     return {
-      radical: typeof radical === 'string' ? radical : radical[0]?.radical || '',
-      strokes: typeof strokeCount === 'number' ? strokeCount : 0,
+      radical,
+      radicalStrokes: typeof radicalStrokes === 'number' ? radicalStrokes : 0,
+      totalStrokes: typeof totalStrokes === 'number' ? totalStrokes : 0,
+      remainingStrokes: typeof remainingStrokes === 'number' ? remainingStrokes : 0,
       pinyin: Array.isArray(spellInfo) ? spellInfo : [spellInfo],
-      words: words,
-      definition: definition.slice(0, 20) // Limit length for UI
+      words,
+      definition: definition.slice(0, 20)
     };
   } catch (e) {
     console.warn("Dictionary lookup failed", e);
     return {
       radical: '',
-      strokes: 0,
+      radicalStrokes: 0,
+      totalStrokes: 0,
+      remainingStrokes: 0,
       pinyin: [],
       words: [],
       definition: ''
