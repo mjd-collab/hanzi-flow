@@ -9,7 +9,8 @@ export enum AppState {
   PLAYING = 'PLAYING',
 }
 
-// Minimal type definition for HanziWriter since we might not have the d.ts installed in this environment
+export type QuizMode = 'none' | 'hint';
+
 export interface HanziWriterOptions {
   width?: number;
   height?: number;
@@ -23,10 +24,14 @@ export interface HanziWriterOptions {
   showCharacter?: boolean;
   showHintAfterMisses?: number;
   highlightColor?: string; 
+  drawingWidth?: number;
+  // Callback for stroke audio
+  onStrokeStart?: (data: { strokeNum: number }) => void;
+  onCorrectStroke?: (data: { strokeNum: number }) => void;
 }
 
 export interface HanziWriterInstance {
-  animateCharacter(options?: { onComplete?: () => void }): void;
+  animateCharacter(options?: { onComplete?: () => void, onStrokeStart?: (data: { strokeNum: number }) => void }): void;
   loopCharacterAnimation(): void;
   showCharacter(): void;
   hideCharacter(): void;
