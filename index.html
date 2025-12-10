@@ -3,19 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, viewport-fit=cover" />
-    <title>汉字笔顺 Hanzi Flow</title>
+    <title>沐沐小黑板 MuMu Blackboard</title>
     
     <!-- PWA Settings -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#fdfbf7" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="汉字笔顺" />
+    <meta name="apple-mobile-web-app-title" content="沐沐小黑板" />
     <link rel="apple-touch-icon" href="/icon.png" />
 
-    <!-- Tailwind CSS (Using CDN for simplicity in this setup, ideally should be npm installed) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Domestic Fonts fallback (System fonts first) -->
+    
+    <!-- Domestic Fonts fallback -->
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&display=swap');
       
@@ -87,33 +88,33 @@
             },
             colors: {
               ink: {
-                900: '#1a1a1a', // 徽墨
+                900: '#1a1a1a', 
                 800: '#2d2d2d',
                 100: '#f5f5f4', 
                 50: '#fafaf9',
               },
-              paper: '#fdfbf7', // 宣纸
-              accent: '#c0392b', // 朱砂
+              paper: '#fdfbf7', 
+              accent: '#c0392b', 
             }
           }
         }
       }
     </script>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.30.0",
-    "vite": "https://aistudiocdn.com/vite@^7.2.4",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
-    "hanzi-writer": "https://aistudiocdn.com/hanzi-writer@^3.7.3",
-    "cnchar-radical": "https://aistudiocdn.com/cnchar-radical@^3.2.6",
-    "cnchar": "https://aistudiocdn.com/cnchar@^3.2.6",
-    "cnchar-poly": "https://aistudiocdn.com/cnchar-poly@^3.2.6",
-    "cnchar-explain": "https://aistudiocdn.com/cnchar-explain@^3.2.6",
-    "cnchar-words": "https://aistudiocdn.com/cnchar-words@^3.2.6"
+    "react": "https://esm.sh/react@^19.2.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.1/",
+    "react/": "https://esm.sh/react@^19.2.1/",
+    "hanzi-writer": "https://esm.sh/hanzi-writer@^3.7.3",
+    "vite": "https://esm.sh/vite@^7.2.7",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2",
+    "cnchar": "https://esm.sh/cnchar@^3.2.6",
+    "cnchar-poly": "https://esm.sh/cnchar-poly@^3.2.6",
+    "cnchar-radical": "https://esm.sh/cnchar-radical@^3.2.6",
+    "cnchar-explain": "https://esm.sh/cnchar-explain@^3.2.6",
+    "cnchar-words": "https://esm.sh/cnchar-words@^3.2.6",
+    "cnchar-order": "https://esm.sh/cnchar-order@^3.2.6"
   }
 }
 </script>
@@ -123,7 +124,7 @@
     <!-- Splash Screen -->
     <div id="splash">
       <div class="loader"></div>
-      <div style="margin-top: 20px; font-family: serif; color: #1a1a1a; letter-spacing: 0.1em;">汉字笔顺</div>
+      <div style="margin-top: 20px; font-family: serif; color: #1a1a1a; letter-spacing: 0.1em;">沐沐小黑板</div>
     </div>
 
     <div id="root" class="h-full w-full fixed inset-0"></div>
@@ -132,14 +133,12 @@
     <script type="module" src="/index.tsx"></script>
     
     <script>
-      // Service Worker for PWA
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/service-worker.js')
             .catch((err) => console.log('SW failed', err));
         });
       }
-      // Remove splash when React mounts
       window.removeSplash = () => {
         const splash = document.getElementById('splash');
         if(splash) {
